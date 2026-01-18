@@ -1,0 +1,5 @@
+use ai
+data emails from "emails.csv"
+model spam type classification
+train spam using emails
+print "NEC language is real"
