@@ -47,7 +47,7 @@ class NECConsole:
         # Banner
         self.console.insert(
             tk.END,
-            "NEC Console v0.8.0\nType NEC code below\n\n",
+            "NEC Console v0.9.0\nType NEC code below\n\n",
             "banner"
         )
         self.show_prompt()
