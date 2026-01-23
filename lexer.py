@@ -2,8 +2,20 @@ import re
 from errors import NECError
 
 TOKENS = [
+    ("IF", r"\bif\b"),
+    ("ELSE", r"\belse\b"),
+    ("WHILE", r"\bwhile\b"),
+
+    ("EQ", r"=="),
+    ("NE", r"!="),
+    ("LE", r"<="),
+    ("GE", r">="),
+    ("LT", r"<"),
+    ("GT", r">"),
+
     ("NUMBER", r"\d+"),
     ("STRING", r'"[^"]*"'),
+
     ("LET", r"\blet\b"),
     ("PRINT", r"\bprint\b"),
     ("DATA", r"\bdata\b"),
@@ -13,31 +25,32 @@ TOKENS = [
     ("TRAIN", r"\btrain\b"),
     ("USING", r"\busing\b"),
     ("USE", r"\buse\b"),
-    ("IDENT", r"[a-zA-Z_][a-zA-Z0-9_]*"),
+
+    ("COLON", r":"),
     ("OP", r"="),
+    ("IDENT", r"[a-zA-Z_][a-zA-Z0-9_]*"),
+
     ("NEWLINE", r"\n"),
     ("SKIP", r"[ \t]+"),
 ]
 
 def lex(code):
-    pos, line = 0, 1
+    pos = 0
+    line = 1
     tokens = []
 
     while pos < len(code):
-        match = None
         for name, pattern in TOKENS:
-            regex = re.compile(pattern)
-            match = regex.match(code, pos)
-            if match:
-                text = match.group(0)
+            m = re.match(pattern, code[pos:])
+            if m:
+                text = m.group(0)
                 if name == "NEWLINE":
                     line += 1
                 elif name != "SKIP":
                     tokens.append((name, text, line))
-                pos = match.end()
+                pos += len(text)
                 break
-
-        if not match:
+        else:
             raise NECError(f"Illegal character '{code[pos]}'", line)
 
     return tokens

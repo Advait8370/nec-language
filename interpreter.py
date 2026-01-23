@@ -25,8 +25,7 @@ class NECInterpreter:
         elif n == "Data":
             try:
                 with open(node.source) as f:
-                    reader = csv.DictReader(f)
-                    self.vars[node.name] = list(reader)
+                    self.vars[node.name] = list(csv.DictReader(f))
             except FileNotFoundError:
                 raise NECError(f"File not found '{node.source}'", node.line)
 
@@ -43,17 +42,29 @@ class NECInterpreter:
             path = os.path.join(PKG_DIR, node.package)
             if not os.path.exists(path):
                 raise NECError(
-                    f"Package '{node.package}' not installed (run: nec install {node.package})",
+                    f"Package '{node.package}' not installed",
                     node.line
                 )
-            self.packages[node.package] = path
             print(f"[NEC] Loaded package '{node.package}'")
+
+        elif n == "If":
+            left = self.eval(node.left)
+            right = self.eval(node.right)
+            cond = {
+                "==": left == right,
+                "!=": left != right,
+                "<": left < right,
+                ">": left > right,
+                "<=": left <= right,
+                ">=": left >= right,
+            }[node.op]
+
+            for stmt in node.body if cond else node.else_body:
+                self.exec(stmt)
 
     def eval(self, value):
         if value.startswith('"'):
             return value.strip('"')
         if value.isdigit():
             return int(value)
-        if value in self.vars:
-            return self.vars[value]
-        return value
+        return self.vars.get(value, value)
